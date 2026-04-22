@@ -54,7 +54,7 @@ def classify_text(raw_text):
 
     return {"label": label, "confidence": confidence, "probs": probs.tolist()}
 
-# Interactive testing
+# Interactive   testing
 if __name__ == "__main__":
     print("=== Hate Speech Detection Test ===")
     while True:
