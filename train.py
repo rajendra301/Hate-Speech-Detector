@@ -25,7 +25,7 @@ torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
 #  Load dataset 
-df = pd.read_csv("topnep.csv")
+df = pd.read_csv("dataset.csv")
 print("Columns in dataset:", df.columns.tolist())
 
 # AUTO-DETECT TEXT , LABEL COLUMNS
@@ -229,7 +229,7 @@ trainer = WeightedTrainer(
 trainer.train()
 
 # Evaluate on test set
-print("\n===== TEST METRICS =====")
+print("\n TEST METRICS ")
 test_metrics = trainer.evaluate(eval_dataset=test_dataset)
 print(test_metrics)
 
