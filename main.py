@@ -1,7 +1,7 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch.nn.functional as F
-import re # <-- New import for cleaning
+import re 
 
 
 # TEXT CLEANING FUNCTION (MUST MATCH data.py)
@@ -26,12 +26,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 model.eval()
 
-# Mapping from label IDs to names (change if your training labels differ)
+# Mapping from label IDs to names change if your training labels differ
 id2label = {0: "Non-Hate Speech", 1: "Hate Speech"}
 
 def classify_text(raw_text):
     # Apply the exact same cleaning as during training
-    text = clean_text(raw_text) # <-- Apply the cleaning function!
+    text = clean_text(raw_text) 
 
     # Tokenize
     inputs = tokenizer(
