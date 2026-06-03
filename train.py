@@ -24,11 +24,11 @@ set_seed(42)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 
-# --- Load dataset ---
+#  Load dataset 
 df = pd.read_csv("topnep.csv")
 print("Columns in dataset:", df.columns.tolist())
 
-# AUTO-DETECT TEXT + LABEL COLUMNS
+# AUTO-DETECT TEXT , LABEL COLUMNS
 TEXT_COLUMN = None
 LABEL_COLUMN = None
 possible_text_cols = ["text", "tweet", "comment", "sentence", "message"]
@@ -42,13 +42,13 @@ for col in df.columns:
 
 if TEXT_COLUMN is None or LABEL_COLUMN is None:
     raise ValueError(
-        f"❌ ERROR: Could not detect text/label columns.\nDetected columns: {df.columns.tolist()}"
+        f" ERROR: Could not detect text/label columns.\nDetected columns: {df.columns.tolist()}"
     )
 
 print(f"Detected TEXT column  → {TEXT_COLUMN}")
 print(f"Detected LABEL column → {LABEL_COLUMN}")
 
-# NORMALIZE LABELS → binary classification (0=non-hate, 1=hate)
+# NORMALIZE LABELS, binary classification (0=non-hate, 1=hate)
 def normalize_label(x):
     x = str(x).strip().lower()
     if x in {"1", "hate", "offensive", "true", "yes"}:
@@ -58,15 +58,14 @@ def normalize_label(x):
 df["label"] = df[LABEL_COLUMN].apply(normalize_label).astype(int)
 print("Unique labels after normalization:", df["label"].unique())
 if len(df["label"].unique()) < 2:
-    raise ValueError("❌ STOP! The dataset only has 1 class after processing. Check your CSV labels.")
+    raise ValueError("STOP! The dataset only has 1 class after processing. Check your CSV labels.")
 
-# CLEAN TEXT (keeps Nepali unicode; optionally also used for romanized)
+# CLEAN TEXT 
 def clean_text(text):
     text = str(text)
     text = re.sub(r"http\S+|www\.\S+", "", text)
     text = re.sub(r"@\w+", "", text)
     text = re.sub(r"#", "", text)
-    # keep Unicode (Nepali) but remove weird control chars
     text = re.sub(r"[\r\n\t]+", " ", text)
     text = text.lower()
     text = re.sub(r"\s+", " ", text).strip()
@@ -92,7 +91,7 @@ val_df, test_df = train_test_split(
 print(f"Train: {len(train_df)}, Validation: {len(val_df)}, Test: {len(test_df)}")
 print("Train label distribution:\n", train_df["label"].value_counts())
 
-# If training set is heavily imbalanced, upsample minority class (simple fix)
+# If training set is heavily imbalanced, upsample minority class
 min_count = train_df["label"].value_counts().min()
 max_count = train_df["label"].value_counts().max()
 imbalance_ratio = max_count / min_count if min_count > 0 else None
@@ -142,7 +141,7 @@ train_dataset = HateSpeechDataset(train_df["text"].tolist(), train_df["label"].t
 val_dataset   = HateSpeechDataset(val_df["text"].tolist(),   val_df["label"].tolist(),   tokenizer)
 test_dataset  = HateSpeechDataset(test_df["text"].tolist(),  test_df["label"].tolist(),  tokenizer)
 
-# CLASS WEIGHTS (for reference / optionally use)
+# CLASS WEIGHTS 
 class_weights = compute_class_weight(
     "balanced",
     classes=np.unique(train_df["label"]),
@@ -151,7 +150,7 @@ class_weights = compute_class_weight(
 class_weights = torch.tensor(class_weights, dtype=torch.float)
 print("Class weights (0,1):", class_weights.numpy())
 
-# Custom Trainer: we override compute_loss to use weighted CE and override train dataloader to use sampler if desired
+# Custom Trainer, we override compute_loss to use weighted CE and override train dataloader to use sampler if desired
 class WeightedTrainer(Trainer):
     def __init__(self, *args, use_sampler=False, **kwargs):
         """
@@ -214,7 +213,7 @@ def compute_metrics(pred):
     acc = (labels == preds).mean()
     return {"accuracy": acc, "precision": float(p), "recall": float(r), "f1": float(f1)}
 
-# Instantiate trainer: enable sampler if dataset is still imbalanced
+#enable sampler if dataset is still imbalanced
 use_sampler = True
 trainer = WeightedTrainer(
     model=model,
@@ -253,6 +252,6 @@ def predict(text, thresh=0.5):
     return {"label": int(pred), "prob": confidence, "text": text}
 
 # quick check
-print("\n===== SAMPLE TEST =====")
+print("\n= SAMPLE TEST ==")
 print(predict("I hate you"))
 print(predict("म तिमीलाई मन पराउँदिन", ))
